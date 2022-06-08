@@ -1,6 +1,13 @@
 import { useState } from 'react'
 
+const Button = (props) => {
+  return (
+    <button onClick={props.handler}>next anecdote</button>
+  )
+}
+
 const App = () => {
+  
   const anecdotes = [
     'If it hurts, do it more often',
     'Adding manpower to a late software project makes it later!',
@@ -13,10 +20,19 @@ const App = () => {
    
   const [selected, setSelected] = useState(0)
 
+  const randomizeSelected = () => {
+    const randomIndex = Math.round(Math.random() * (anecdotes.length - 1))
+    setSelected(randomIndex)
+  }
+
   return (
     <div>
-      {anecdotes[selected]}
+      <div>
+        {anecdotes[selected]}
+      </div>
+      <Button handler={randomizeSelected}/>
     </div>
+    
   )
 }
 
