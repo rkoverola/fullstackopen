@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 const Button = (props) => {
   return (
-    <button onClick={props.handler}>next anecdote</button>
+    <button onClick={props.handler}>{props.text}</button>
   )
 }
 
@@ -17,12 +17,22 @@ const App = () => {
     'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
     'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients'
   ]
-   
+
+  const initVotes = new Array(anecdotes.length).fill(0)
+  
   const [selected, setSelected] = useState(0)
+  const [votes, setVotes] = useState(initVotes)
 
   const randomizeSelected = () => {
     const randomIndex = Math.round(Math.random() * (anecdotes.length - 1))
+    console.log('Setting index to ', randomIndex)
     setSelected(randomIndex)
+  }
+
+  const voteForSelectedIndex = () => {
+    const copiedVotes = [...votes]
+    copiedVotes[selected] += 1
+    setVotes(copiedVotes)
   }
 
   return (
@@ -30,7 +40,11 @@ const App = () => {
       <div>
         {anecdotes[selected]}
       </div>
-      <Button handler={randomizeSelected}/>
+      <div>
+        has {votes[selected]} votes
+      </div>
+      <Button handler={voteForSelectedIndex} text={'vote'}/>
+      <Button handler={randomizeSelected} text={'next anecdote'}/>
     </div>
     
   )
