@@ -22,6 +22,7 @@ const App = () => {
   
   const [selected, setSelected] = useState(0)
   const [votes, setVotes] = useState(initVotes)
+  const [mostVoted, setMostVoted] = useState(0)
 
   const randomizeSelected = () => {
     const randomIndex = Math.round(Math.random() * (anecdotes.length - 1))
@@ -29,22 +30,38 @@ const App = () => {
     setSelected(randomIndex)
   }
 
+  // FIXME: Datarace here if update called at the end of the function
   const voteForSelectedIndex = () => {
     const copiedVotes = [...votes]
     copiedVotes[selected] += 1
     setVotes(copiedVotes)
+    //updateMostVotedIndex()
+  }
+
+  const updateMostVotedIndex = () => {
+    const ranked = [...votes].sort()
+    const best = ranked[votes.length - 1]
+    const bestIndex = votes.indexOf(best)
+    console.log('Setting best index to ', bestIndex)
+    setMostVoted(bestIndex)
   }
 
   return (
     <div>
+      <h1>Anecdote of the day</h1>
       <div>
         {anecdotes[selected]}
       </div>
-      <div>
-        has {votes[selected]} votes
-      </div>
       <Button handler={voteForSelectedIndex} text={'vote'}/>
       <Button handler={randomizeSelected} text={'next anecdote'}/>
+      <h1>Anecdote with most votes</h1>
+      <div>
+        {anecdotes[mostVoted]}
+      </div>
+      <div>
+        has {votes[mostVoted]} votes
+      </div>
+      <Button handler={updateMostVotedIndex} text={'refresh'}/>
     </div>
     
   )
