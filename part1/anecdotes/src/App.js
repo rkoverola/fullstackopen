@@ -1,5 +1,26 @@
 import { useState } from 'react'
 
+const MostVoted = (props) => {
+  
+  const calculateMostVotedIndex = () => {
+    const ranked = [...props.votes].sort()
+    const best = ranked[ranked.length - 1]
+    const bestIndex = props.votes.indexOf(best)
+    return bestIndex
+  }
+  
+  return (
+    <>
+      <div>
+        {props.anecdotes[calculateMostVotedIndex()]}
+      </div>
+      <div>
+        has {props.votes[calculateMostVotedIndex()]} votes
+      </div>
+    </>
+  )
+}
+
 const Button = (props) => {
   return (
     <button onClick={props.handler}>{props.text}</button>
@@ -22,28 +43,16 @@ const App = () => {
   
   const [selected, setSelected] = useState(0)
   const [votes, setVotes] = useState(initVotes)
-  const [mostVoted, setMostVoted] = useState(0)
 
   const randomizeSelected = () => {
     const randomIndex = Math.round(Math.random() * (anecdotes.length - 1))
-    console.log('Setting index to ', randomIndex)
     setSelected(randomIndex)
   }
 
-  // FIXME: Datarace here if update called at the end of the function
   const voteForSelectedIndex = () => {
     const copiedVotes = [...votes]
     copiedVotes[selected] += 1
     setVotes(copiedVotes)
-    //updateMostVotedIndex()
-  }
-
-  const updateMostVotedIndex = () => {
-    const ranked = [...votes].sort()
-    const best = ranked[votes.length - 1]
-    const bestIndex = votes.indexOf(best)
-    console.log('Setting best index to ', bestIndex)
-    setMostVoted(bestIndex)
   }
 
   return (
@@ -55,13 +64,7 @@ const App = () => {
       <Button handler={voteForSelectedIndex} text={'vote'}/>
       <Button handler={randomizeSelected} text={'next anecdote'}/>
       <h1>Anecdote with most votes</h1>
-      <div>
-        {anecdotes[mostVoted]}
-      </div>
-      <div>
-        has {votes[mostVoted]} votes
-      </div>
-      <Button handler={updateMostVotedIndex} text={'refresh'}/>
+      <MostVoted anecdotes={anecdotes} votes={votes}/>
     </div>
     
   )
