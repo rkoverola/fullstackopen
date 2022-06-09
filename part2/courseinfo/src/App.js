@@ -10,10 +10,11 @@ const Content = ({course}) => {
     </>
   )
 }
-const Total = (props) => {
+const Total = ({course}) => {
+  console.log("Calculating total with:", course.parts)
   return (
     <>
-      <p>Number of exercises {props.course.parts[0].exercises + props.course.parts[1].exercises + props.course.parts[2].exercises}</p>
+      <p>Number of exercises {course.parts.map(p => p.exercises).reduce((e1, e2) => e1 + e2, 0)}</p>
     </>
   )
 }
@@ -23,6 +24,7 @@ const Course = ({course}) => {
     <>
       <Header name={course.name}/>
       <Content course={course} />
+      <Total course={course}/>
     </>
   )
 }
@@ -49,7 +51,7 @@ const App = () => {
       },
       {
         name: 'Fate of a component',
-        exercises: 14,
+        exercises: 15,
         id: 4
       }
     ]
