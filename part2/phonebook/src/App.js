@@ -1,11 +1,39 @@
 import { useState } from 'react'
 
+const FilterWidget = ({handler, filterString}) => {
+  return (
+    <div>Filter shown with <input onChange={handler} value={filterString}/></div>
+  )
+}
+
+const PersonForm = ({nameHandler, numberHandler, addHandler, newName, newNumber}) => {
+  return (
+    <form>
+        <div>
+          Name: <input onChange={nameHandler} value={newName}/>
+        </div>
+        <div>
+          Number: <input onChange={numberHandler} value={newNumber}/>
+        </div>
+        <div>
+          <button type="submit" onClick={addHandler}>Add</button>
+        </div>
+      </form>
+  )
+}
+
+const Person = ({person}) => {
+  return (
+    <div>{person.name} {person.number}</div>
+  )
+}
+
 const PersonList = ({persons, filterString}) => {
   const rawFilter = filterString.toLowerCase()
   const shownPersons = persons.filter(p => p.name.toLowerCase().startsWith(rawFilter))
   return (
     <div>
-      {shownPersons.map(p => <div key={p.name}>{p.name} {p.number}</div>)}
+      {shownPersons.map(p => <Person key={p.name} person={p}/>)}
     </div>
   )
 }
@@ -46,19 +74,15 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      Filter shown with <input onChange={handleFilterStringChange} value={filterString}/>
+      <FilterWidget handler={handleFilterStringChange} filterString={filterString}/>
       <h2>Add new</h2>
-      <form>
-        <div>
-          Name: <input onChange={handleNewNameChange} value={newName}/>
-        </div>
-        <div>
-          Number: <input onChange={handleNewNumberChange} value={newNumber}/>
-        </div>
-        <div>
-          <button type="submit" onClick={addPerson}>Add</button>
-        </div>
-      </form>
+      <PersonForm 
+        nameHandler={handleNewNameChange}
+        numberHandler={handleNewNumberChange}
+        addHandler={addPerson}
+        newName={newName}
+        newNumber={newNumber}
+      />
       <h2>Numbers</h2>
       <PersonList persons={persons} filterString={filterString}/>
     </div>
