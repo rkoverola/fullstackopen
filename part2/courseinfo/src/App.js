@@ -11,10 +11,11 @@ const Content = ({course}) => {
   )
 }
 const Total = ({course}) => {
-  console.log("Calculating total with:", course.parts)
+  const all = course.parts.map(p => p.exercises)
+  const total = all.reduce((e1, e2) => e1 + e2, 0)
   return (
     <>
-      <p>Number of exercises {course.parts.map(p => p.exercises).reduce((e1, e2) => e1 + e2, 0)}</p>
+      <p>Number of exercises {total}</p>
     </>
   )
 }
@@ -51,7 +52,7 @@ const App = () => {
       },
       {
         name: 'Fate of a component',
-        exercises: 15,
+        exercises: 49,
         id: 4
       }
     ]
