@@ -69,11 +69,16 @@ const App = () => {
       const personObject = {
         name: newName,
         number: newNumber,
-        id: persons.length + 1
       }
-      setPersons(persons.concat(personObject))
-      setNewName('')
-      setNewNumber('')
+      const url = `http://localhost:3001/persons`
+      axios
+        .post(url, personObject)
+        .then(response => {
+          setPersons(persons.concat(response.data))
+          setNewName('')
+          setNewNumber('')
+        })
+        .catch(error => alert('Adding failed.'))
     }
   }
 
