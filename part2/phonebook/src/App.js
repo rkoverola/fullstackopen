@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 const FilterWidget = ({handler, filterString}) => {
   return (
@@ -48,11 +48,11 @@ const App = () => {
 
   useEffect(() => {
     console.log('Using effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then((response) => {
-        console.log('Data from server ->', response.data)
-        setPersons(response.data)
+    personService
+      .getAll()
+      .then(all => {
+        console.log('Data from server ->', all)
+        setPersons(all)
       })
   }, [])
 
@@ -70,11 +70,10 @@ const App = () => {
         name: newName,
         number: newNumber,
       }
-      const url = `http://localhost:3001/persons`
-      axios
-        .post(url, personObject)
-        .then(response => {
-          setPersons(persons.concat(response.data))
+      personService
+        .add(personObject)
+        .then(addedPerson => {
+          setPersons(persons.concat(addedPerson))
           setNewName('')
           setNewNumber('')
         })
