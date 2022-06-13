@@ -7,7 +7,7 @@ const FilterWidget = ({handler, filterString}) => {
   )
 }
 
-const CountryList = ({countries, filterString}) => {
+const CountryList = ({countries, filterString, setFilterString}) => {
   
   const rawFilter = filterString.toLowerCase()
   const shownCountries = countries.filter(c => c.name.common.toLowerCase().startsWith(rawFilter))
@@ -15,7 +15,7 @@ const CountryList = ({countries, filterString}) => {
   if(shownCountries.length <= 10 && shownCountries.length > 1) {
     return (
       <div>
-        {shownCountries.map(c => <Country key={c.name.official} country={c}/>)}
+        {shownCountries.map(c => <Country key={c.name.official} country={c} setFilterString={setFilterString} />)}
       </div>
     )
   }
@@ -59,9 +59,16 @@ const CountryInfo = ({country}) => {
   )
 }
 
-const Country = ({country}) => {
+const Country = ({country, setFilterString}) => {
+  const setFilterToThisCountry = () => {
+    console.log('Setting filter to ->', country.name.common)
+    setFilterString(country.name.common)
+  }
   return (
-    <div>{country.name.common}</div>
+    <div>
+      {country.name.common}
+      <button onClick={setFilterToThisCountry}>Show</button>
+    </div>
   )
 }
 
@@ -85,7 +92,7 @@ const App = () => {
   return (
     <div>
       <FilterWidget handler={handleFilterStringChange} filterString={filterString}/>
-      <CountryList countries={countries} filterString={filterString}/>
+      <CountryList countries={countries} filterString={filterString} setFilterString={setFilterString}/>
     </div>
   )
 }
