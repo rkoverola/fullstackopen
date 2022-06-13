@@ -67,7 +67,23 @@ const App = () => {
     event.preventDefault()
     const names = persons.map(p => p.name)
     if(names.includes(newName)) {
-      window.alert(`${newName} is already added to phonebook`)
+      const confirm = window.confirm(`${newName} is already in phonebook. Replace old number with new one?`)
+      if(confirm === false) {
+        return
+      }
+      const id = persons.find(p => p.name === newName).id
+      const personObject = {
+        name: newName,
+        number: newNumber,
+      }
+      personService
+        .update(id, personObject)
+        .then(updatedPerson => {
+          console.log('Data from updating ->', updatedPerson)
+          const updatedPersons = persons.map(p => p.id === id ? updatedPerson : p)
+          setPersons(updatedPersons)
+        })
+        .catch(error => alert('Updating failed.'))
     } else {
       const personObject = {
         name: newName,
