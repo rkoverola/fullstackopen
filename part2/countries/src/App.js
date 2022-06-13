@@ -7,7 +7,7 @@ const FilterWidget = ({handler, filterString}) => {
   )
 }
 
-const CountryList = ({countries, filterString, setFilterString}) => {
+const CountryList = ({countries, filterString, setFilterString, currentWeather, setCurrentWeather}) => {
   
   const rawFilter = filterString.toLowerCase()
   const shownCountries = countries.filter(c => c.name.common.toLowerCase().startsWith(rawFilter))
@@ -23,7 +23,7 @@ const CountryList = ({countries, filterString, setFilterString}) => {
   if(shownCountries.length === 1) {
     return (
       <div>
-        <CountryInfo country={shownCountries[0]} />
+        <CountryInfo country={shownCountries[0]} currentWeather={currentWeather} setCurrentWeather={setCurrentWeather} />
       </div>
     )
   }
@@ -44,7 +44,37 @@ const CountryList = ({countries, filterString, setFilterString}) => {
   
 }
 
-const CountryInfo = ({country}) => {
+// TODO: Error handling
+const CountryInfo = ({country, currentWeather, setCurrentWeather}) => {
+  
+  debugger
+  const locationUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${country.capital}&appid=${process.env.REACT_APP_API_KEY}`
+  
+  useEffect(() => {
+    console.log('Calling location API')
+    axios
+      .get(locationUrl)
+      .then((response) => {
+        console.log('Response from location API ->', response.data)
+        const lat = response.data[0].lat
+        const lon = response.data[0].lon
+        const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.REACT_APP_API_KEY}&units=metric`
+        console.log('Calling weather API')
+        axios
+          .get(weatherUrl)
+          .then((response) => {
+            console.log('Response from weather API ->', response.data)
+            const weatherObject = {
+              temp: response.data.main.temp,
+              wind: response.data.wind.speed,
+              iconUrl: `http://openweathermap.org/img/wn/${response.data.weather[0].icon}@2x.png`
+            }
+            console.log('Setting weather to ->', weatherObject)
+            setCurrentWeather(weatherObject)
+          })
+      })
+  }, [])
+
   return (
     <div>
       <h1>{country.name.common}</h1>
@@ -55,6 +85,10 @@ const CountryInfo = ({country}) => {
         {Object.values(country.languages).map(name => <li key={name}>{name}</li>)}
       </ul>
       <img src={country.flags.png} alt={`Flag of ${country.name.common}`}/>
+      <h2>Weather in {country.capital}</h2>
+      <div>Temperature: {currentWeather.temp} Celsius </div>
+      <img src={currentWeather.iconUrl} alt={'Icon of current weather'} />
+      <div>Wind: {currentWeather.wind} m/s </div>
     </div>
   )
 }
@@ -76,6 +110,7 @@ const App = () => {
 
   const [filterString, setFilterString] = useState('')
   const [countries, setCountries] = useState([])
+  const [currentWeather, setCurrentWeather] = useState({ temp: 'Not available', wind: 'Not available', iconUrl: 'Not available' })
 
   const handleFilterStringChange = (event) => setFilterString(event.target.value)
 
@@ -92,7 +127,13 @@ const App = () => {
   return (
     <div>
       <FilterWidget handler={handleFilterStringChange} filterString={filterString}/>
-      <CountryList countries={countries} filterString={filterString} setFilterString={setFilterString}/>
+      <CountryList
+        countries={countries}
+        filterString={filterString}
+        setFilterString={setFilterString}
+        currentWeather={currentWeather}
+        setCurrentWeather={setCurrentWeather}
+       />
     </div>
   )
 }
