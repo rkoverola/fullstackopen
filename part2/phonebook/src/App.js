@@ -85,7 +85,10 @@ const App = () => {
   }
 
   const removePerson = (person) => {
-    window.confirm('Are you sure you want to delete ' + person.name)
+    const confirm = window.confirm('Are you sure you want to delete ' + person.name)
+    if(confirm === false) {
+      return  
+    }
     personService
       .remove(person)
       .then(response => {
