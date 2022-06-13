@@ -23,18 +23,21 @@ const PersonForm = ({nameHandler, numberHandler, addHandler, newName, newNumber}
   )
 }
 
-const Person = ({person}) => {
+const Person = ({person, removeHandler}) => {
   return (
-    <div>{person.name} {person.number}</div>
+    <div>
+      {person.name} {person.number} 
+      <button onClick={removeHandler}>Delete</button>
+    </div>
   )
 }
 
-const PersonList = ({persons, filterString}) => {
+const PersonList = ({persons, filterString, removeHandler}) => {
   const rawFilter = filterString.toLowerCase()
   const shownPersons = persons.filter(p => p.name.toLowerCase().startsWith(rawFilter))
   return (
     <div>
-      {shownPersons.map(p => <Person key={p.name} person={p}/>)}
+      {shownPersons.map(p => <Person key={p.name} person={p} removeHandler={() => removeHandler(p)} />)}
     </div>
   )
 }
@@ -81,6 +84,17 @@ const App = () => {
     }
   }
 
+  const removePerson = (person) => {
+    window.confirm('Are you sure you want to delete ' + person.name)
+    personService
+      .remove(person)
+      .then(response => {
+        console.log('Response from server ->', response)
+        setPersons(persons.filter(p => p.id !== person.id))
+      })
+      .catch(error => alert('Deletion failed.'))
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -94,7 +108,11 @@ const App = () => {
         newNumber={newNumber}
       />
       <h2>Numbers</h2>
-      <PersonList persons={persons} filterString={filterString}/>
+      <PersonList
+        persons={persons}
+        filterString={filterString}
+        removeHandler={removePerson}
+      />
     </div>
   )
 }
