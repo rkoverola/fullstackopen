@@ -1,6 +1,24 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
 
+const Notification = ({ message, error }) => {
+  if (message === null) {
+    return null
+  }
+  if(error) {
+    return (
+      <div className='error'>
+        {message}
+      </div>
+    )
+  }
+  return (
+    <div className='success'>
+      {message}
+    </div>
+  )
+}
+
 const FilterWidget = ({handler, filterString}) => {
   return (
     <div>Filter shown with <input onChange={handler} value={filterString}/></div>
@@ -48,6 +66,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterString, setFilterString] = useState('')
+  const [notification, setNotification] = useState({message: null, error: false})
 
   useEffect(() => {
     console.log('Using effect')
@@ -62,6 +81,11 @@ const App = () => {
   const handleNewNameChange = (event) => setNewName(event.target.value)
   const handleNewNumberChange = (event) => setNewNumber(event.target.value)
   const handleFilterStringChange = (event) => setFilterString(event.target.value)
+
+  const sendNotificationToUser = (message, error) => {
+    setNotification({ message: message, error: error})
+    setTimeout(() => setNotification({message: null, error: false}), 5000 )
+  }
   
   const addPerson = (event) => {
     event.preventDefault()
@@ -79,11 +103,13 @@ const App = () => {
       personService
         .update(id, personObject)
         .then(updatedPerson => {
-          console.log('Data from updating ->', updatedPerson)
           const updatedPersons = persons.map(p => p.id === id ? updatedPerson : p)
           setPersons(updatedPersons)
+          sendNotificationToUser('Update successful.', false)
         })
-        .catch(error => alert('Updating failed.'))
+        .catch(error => {
+          sendNotificationToUser('Could not update number.', true)
+        })
     } else {
       const personObject = {
         name: newName,
@@ -95,8 +121,11 @@ const App = () => {
           setPersons(persons.concat(addedPerson))
           setNewName('')
           setNewNumber('')
+          sendNotificationToUser('Added ' + addedPerson.name, false)
         })
-        .catch(error => alert('Adding failed.'))
+        .catch(error => {
+          sendNotificationToUser('Adding failed.', true)
+        })
     }
   }
 
@@ -108,15 +137,18 @@ const App = () => {
     personService
       .remove(person)
       .then(response => {
-        console.log('Response from server ->', response)
         setPersons(persons.filter(p => p.id !== person.id))
+        sendNotificationToUser('Successfully removed ' + person.name, false)
       })
-      .catch(error => alert('Deletion failed.'))
+      .catch(error => {
+        sendNotificationToUser('Removing failed', true)
+      })
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification.message} error={notification.error} />
       <FilterWidget handler={handleFilterStringChange} filterString={filterString}/>
       <h2>Add new</h2>
       <PersonForm 
