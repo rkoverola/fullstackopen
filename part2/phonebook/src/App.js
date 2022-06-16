@@ -105,6 +105,8 @@ const App = () => {
         .then(updatedPerson => {
           const updatedPersons = persons.map(p => p.id === id ? updatedPerson : p)
           setPersons(updatedPersons)
+          setNewName('')
+          setNewNumber('')
           sendNotificationToUser('Update successful.', false)
         })
         .catch(error => {
