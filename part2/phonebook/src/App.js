@@ -87,7 +87,47 @@ const App = () => {
     setTimeout(() => setNotification({message: null, error: false}), 5000 )
   }
   
-  const addPerson = (event) => {
+  const addPerson = () => {
+    const personObject = {
+      name: newName,
+      number: newNumber,
+    }
+    personService
+      .add(personObject)
+      .then(addedPerson => {
+        setPersons(persons.concat(addedPerson))
+        setNewName('')
+        setNewNumber('')
+        sendNotificationToUser('Added ' + addedPerson.name, false)
+      })
+      .catch(error => {
+        console.log("Got error -> ", error)
+        sendNotificationToUser(`${error.response.data.error}`, true)
+      })
+  }
+
+  const updatePerson = () => {
+    const id = persons.find(p => p.name === newName).id
+    const personObject = {
+      name: newName,
+      number: newNumber,
+    }
+    personService
+      .update(id, personObject)
+      .then(updatedPerson => {
+        const updatedPersons = persons.map(p => p.id === id ? updatedPerson : p)
+        setPersons(updatedPersons)
+        setNewName('')
+        setNewNumber('')
+        sendNotificationToUser('Update successful.', false)
+      })
+      .catch(error => {
+        console.log("Got error -> ", error)
+        sendNotificationToUser(`${error.response.data.error}`, true)
+      })
+  }
+
+  const handleAdding = (event) => {
     event.preventDefault()
     const names = persons.map(p => p.name)
     if(names.includes(newName)) {
@@ -95,39 +135,9 @@ const App = () => {
       if(confirm === false) {
         return
       }
-      const id = persons.find(p => p.name === newName).id
-      const personObject = {
-        name: newName,
-        number: newNumber,
-      }
-      personService
-        .update(id, personObject)
-        .then(updatedPerson => {
-          const updatedPersons = persons.map(p => p.id === id ? updatedPerson : p)
-          setPersons(updatedPersons)
-          setNewName('')
-          setNewNumber('')
-          sendNotificationToUser('Update successful.', false)
-        })
-        .catch(error => {
-          sendNotificationToUser('Could not update number.', true)
-        })
+      updatePerson()
     } else {
-      const personObject = {
-        name: newName,
-        number: newNumber,
-      }
-      personService
-        .add(personObject)
-        .then(addedPerson => {
-          setPersons(persons.concat(addedPerson))
-          setNewName('')
-          setNewNumber('')
-          sendNotificationToUser('Added ' + addedPerson.name, false)
-        })
-        .catch(error => {
-          sendNotificationToUser('Adding failed.', true)
-        })
+      addPerson()
     }
   }
 
@@ -156,7 +166,7 @@ const App = () => {
       <PersonForm 
         nameHandler={handleNewNameChange}
         numberHandler={handleNewNumberChange}
-        addHandler={addPerson}
+        addHandler={handleAdding}
         newName={newName}
         newNumber={newNumber}
       />
