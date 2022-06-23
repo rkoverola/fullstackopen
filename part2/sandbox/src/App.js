@@ -2,21 +2,13 @@ import { useState, useEffect } from 'react'
 
 import Note from './components/Note'
 import Notification from './components/Notification'
-import noteService from './services/notes'
+import LoginForm from './components/LoginForm'
+import NoteForm from './components/NoteForm'
+import Footer from './components/Footer'
 
-const Footer = () => {
-  const footerStyle = {
-    color: 'green',
-    fontStyle: 'italic',
-    fontSize: 16
-  }
-  return (
-    <div style={footerStyle}>
-      <br />
-      <em>Note app, Department of Computer Science, University of Helsinki 2022</em>
-    </div>
-  )
-}
+import noteService from './services/notes'
+import loginService from './services/login'
+import Togglable from './components/Togglable'
 
 const App = () => {
 
@@ -24,6 +16,10 @@ const App = () => {
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
+  const [loginVisible, setLoginVisible] = useState(false)
 
   useEffect(() => {
     console.log('effect')
@@ -34,26 +30,41 @@ const App = () => {
       })
   }, [])
 
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedNoteAppUser')
+    if(loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      noteService.setToken(user.token)
+    }
+  }, [])
+
   console.log('render', notes.length, 'notes')
 
-  const addNote = (event) => {
-    event.preventDefault()
-    console.log('button clicked', event.target)
-    const noteObject = {
-      content: newNote,
-      date: new Date().toISOString(),
-      important: Math.random() < 0.5
-    }
+  const addNote = (noteObject) => {
     noteService
-      .create(noteObject)
-      .then((returnedNote) => {
-        setNotes(notes.concat(returnedNote))
-        setNewNote('')
-      })
+    .create(noteObject)
+    .then(returnedNote => {
+      setNotes(notes.concat(returnedNote))
+    })
   }
 
-  const handleNoteChange = (event) => {
-    setNewNote(event.target.value)
+  const handleLogin = async (event) => {
+    event.preventDefault()
+    console.log('logging in with', username, password)
+    try {
+      const user = await loginService.login({ username, password })
+      setUser(user)
+      window.localStorage.setItem('loggedNoteAppUser', JSON.stringify(user))
+      noteService.setToken(user.token)
+      setUsername('')
+      setPassword('')
+    } catch(exception) {
+      setErrorMessage('Wrong username or password')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
   }
 
   const toggleImportance = (id) => {
@@ -75,11 +86,39 @@ const App = () => {
   }
   
   const notesToShow = showAll ? notes : notes.filter(n => n.important)
+  const handleUsernameChange = ({ target }) => { setUsername(target.value) }
+  const handlePasswordChange = ({ target }) => { setPassword(target.value) }
+
+  const loginForm = () => {
+    return (
+      <Togglable buttonLabel={'Log in'}>
+        <LoginForm 
+          handleLogin={handleLogin}
+          handleUsernameChange={handleUsernameChange}
+          handlePasswordChange={handlePasswordChange}
+          username={username}
+          password={password}
+        />
+      </Togglable>
+    )
+  }
+
+  const noteForm = () => { 
+    return (
+      <Togglable buttonLabel={'Create new'}>
+        <NoteForm createNote={addNote} />
+      </Togglable>
+    )
+  }
 
   return (
     <div>
       <h1>Notes</h1>
       <Notification message={errorMessage} />
+      
+      {loginForm()}
+      {noteForm()}
+      
       <div>
         <button onClick={() => setShowAll(!showAll)}>
           Show {showAll ? 'important' : 'all'}
@@ -94,10 +133,7 @@ const App = () => {
           />
         )}
       </ul>
-      <form onSubmit={addNote}>
-        <input value={newNote} onChange={handleNoteChange}/>
-        <button type="submit">Save</button>
-      </form>
+
       <Footer/>
     </div>
   )
