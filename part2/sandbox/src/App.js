@@ -34,7 +34,7 @@ const App = () => {
     if(loggedUserJSON) {
       const parsedUser = JSON.parse(loggedUserJSON)
       setUser(parsedUser)
-      noteService.setToken(user.token)
+      noteService.setToken(parsedUser.token)
     }
   }, [])
 
