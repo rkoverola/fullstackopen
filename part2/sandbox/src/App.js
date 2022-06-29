@@ -19,6 +19,7 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const noteFormRef = useRef()
+  const loginFormRef = useRef()
 
   useEffect(() => {
     console.log('effect')
@@ -59,7 +60,9 @@ const App = () => {
       noteService.setToken(user.token)
       setUsername('')
       setPassword('')
+      loginFormRef.current.toggleVisibility()
     } catch(exception) {
+      console.log(exception)
       setErrorMessage('Wrong username or password')
       setTimeout(() => {
         setErrorMessage(null)
@@ -91,7 +94,7 @@ const App = () => {
 
   const loginForm = () => {
     return (
-      <Togglable buttonLabel={'Log in'}>
+      <Togglable buttonLabel={'Log in'} ref={loginFormRef} >
         <LoginForm
           handleLogin={handleLogin}
           handleUsernameChange={handleUsernameChange}
@@ -111,11 +114,19 @@ const App = () => {
     )
   }
 
+  const loggedIn = () => {
+    const message = user ? `${user.name} logged in` : 'sorry nothing'
+    return (
+      <div>{message}</div>
+    )
+  }
+
   return (
     <div>
       <h1>Notes</h1>
       <Notification message={errorMessage} />
 
+      {loggedIn()}
       {loginForm()}
       {noteForm()}
 
