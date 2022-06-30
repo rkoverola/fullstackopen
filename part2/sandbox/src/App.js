@@ -115,7 +115,7 @@ const App = () => {
   }
 
   const loggedIn = () => {
-    const message = user ? `${user.name} logged in` : 'sorry nothing'
+    const message = user ? `${user.name} logged in` : ''
     return (
       <div>{message}</div>
     )
